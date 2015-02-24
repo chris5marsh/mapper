@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Map a room</title>
+  <meta name="description" content="University of York Design Patterns">
+  <meta name="author" content="University of York">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      padding:24px 0 0;
+      margin:0 auto;
+      max-width:320px;
+      font-size:24px;
+      font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+      text-align:center;
+    }
+    input[type=text] {
+      width:90%;
+      line-height:2;
+      border:1px solid #ccc;
+      border-radius:4px;
+      padding:0;
+      margin:0 5% 24px;
+      display:block;
+      font-size:24px;
+      font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+      text-align:center;
+    }
+    input[type=reset],
+    input[type=submit] {
+      -webkit-appearance:none;
+      width:auto;
+      line-height:2;
+      border:1px solid #ccc;
+      border-radius:4px;
+      padding:0 24px;
+      background:#999;
+      margin:0 0 24px;
+      font-size:24px;
+      font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+      text-align:center;
+    }
+    #result {
+      border-radius:6px;
+      margin:20px 0;
+      padding:20px;
+    }
+    .success {
+      background:#26B23F;
+    }
+    .fail {
+      background:#E94746;
+    }
+    #results-table {
+      font-size:16px;
+      border-collapse:collapse;
+      width:100%;
+    }
+    #results-table th,
+    #results-table td {
+      padding:4px;
+      border:1px solid #ccc;
+    }
+    #results-table th {
+      background:#ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Map a room</h1>
+  <form id="room-map">
+    <input type="hidden" id="room-latitude" name="room-latitude" value="">
+    <input type="hidden" id="room-longitude" name="room-longitude" value="">
+    <input type="text" id="room-number" name="room-number" placeholder="Room number" value="">
+    <input type="reset" id="reset-geolocation" value="Get location">
+    <input type="submit" id="submit-geolocation" value="Save">
+  </form>
+  <div id="result"></div>
+  <table id="results-table">
+    <thead>
+      <th>Number</th><th>Latitude</th><th>Longitude</th></tr>
+    </thead>
+    <tbody id="results-table-body">
+    </tbody>
+  </table>
+
+  <script>
+    function success(position) {
+      document.querySelector('#room-latitude').value = position.coords.latitude;
+      document.querySelector('#room-longitude').value = position.coords.longitude;
+      var s = document.querySelector('#result');
+      // not sure why we're hitting this twice in FF, I think it's to do with a cached result coming back
+      if (s.className == 'success') return;
+      s.innerHTML = position.coords.latitude +", "+position.coords.longitude;
+      s.className = "success";
+    }
+
+    function addToTable(number, latitude, longitude) {
+      var rtb = document.querySelector('#results-table-body');
+      rtb.innerHTML+= '\n<tr><td>'+number+'</td><td>'+latitude+'</td><td>'+longitude+'</td></tr>';
+    }
+
+    function error(msg) {
+      var s = document.querySelector('#result');
+      s.innerHTML = typeof msg == 'string' ? msg : "failed";
+      s.className = 'fail';
+    }
+
+    function getPosition(e) {
+      e.preventDefault();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+      } else {
+        error('Geolocation is not supported on this device');
+      }
+    }
+
+    function addPosition(e) {
+      e.preventDefault();
+      var number = document.querySelector('#room-number').value.toUpperCase();
+      var latitude = document.querySelector('#room-latitude').value;
+      var longitude = document.querySelector('#room-longitude').value;
+      addToTable(number, latitude, longitude);
+    }
+
+    var r = document.querySelector('#reset-geolocation');
+    r.addEventListener('click', getPosition);
+
+    var g = document.querySelector('#submit-geolocation');
+    g.addEventListener('click', addPosition);
+
+  </script>
+
+</body>
+</html>
