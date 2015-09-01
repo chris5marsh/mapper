@@ -41,11 +41,13 @@
       font-size:24px;
       font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
       text-align:center;
+      cursor:pointer;
     }
     #result {
       border-radius:6px;
       margin:20px 0;
       padding:20px;
+      word-break:break-word;
     }
     .success {
       background:#26B23F;
@@ -89,7 +91,18 @@
   </table>
 
   <script>
+
+    if (localStorage.positions) {
+      var positions = JSON.parse(localStorage.positions);
+      positions.forEach(function(position, index, array) {
+        addToTable(position.number, position.latitude, position.longitude);
+      });
+    } else {
+      localStorage.positions = JSON.stringify([]);
+    }
+
     function success(position) {
+      // console.log(position);
       document.querySelector('#room-latitude').value = position.coords.latitude;
       document.querySelector('#room-longitude').value = position.coords.longitude;
       var s = document.querySelector('#result');
@@ -105,8 +118,9 @@
     }
 
     function error(msg) {
+      // console.log(msg);
       var s = document.querySelector('#result');
-      s.innerHTML = typeof msg == 'string' ? msg : "failed";
+      s.innerHTML = typeof msg.message == 'string' ? msg.message : "failed";
       s.className = 'fail';
     }
 
@@ -125,6 +139,13 @@
       var latitude = document.querySelector('#room-latitude').value;
       var longitude = document.querySelector('#room-longitude').value;
       addToTable(number, latitude, longitude);
+      var positions = JSON.parse(localStorage.positions);
+      positions.push({
+        "number":number,
+        "latitude":latitude,
+        "longitude":longitude
+      });
+      localStorage.positions = JSON.stringify(positions);
     }
 
     var r = document.querySelector('#reset-geolocation');
